@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 const signUp = async (payload: SignUpPayload): Promise<UserResponse> => {
   try {
-    const response = await RestClient.post("/api/sign-up", payload);
+    const response = await RestClient.post("/sign-up", payload);
     return response.data;
   } catch (error) {
     const errorMess = get(error, ["response", "data", "message"]);
@@ -17,7 +17,7 @@ const signUp = async (payload: SignUpPayload): Promise<UserResponse> => {
 
 const login = async (payload: LoginPayload): Promise<UserResponse> => {
   try {
-    const response = await RestClient.post(`/api/sign-in`, payload);
+    const response = await RestClient.post(`/sign-in`, payload);
     return response.data;
   } catch (error) {
     const errorMess = get(error, ["response", "data", "message"]);
@@ -27,7 +27,7 @@ const login = async (payload: LoginPayload): Promise<UserResponse> => {
 
 const getUserInfo = async (): Promise<UserResponse> => {
   try {
-    const response = await RestClient.get(`/api/user-info`);
+    const response = await RestClient.get(`/user-info`);
     return response.data;
   } catch (error) {
     if (

@@ -4,17 +4,19 @@ export interface LoginPayload {
 }
 
 export interface SignUpPayload {
-  fullName: string;
+  name: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  // confirmPassword: string;
 }
 
 export interface User {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
-  userName: string;
+  role: "user" | "admin";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserResponse {

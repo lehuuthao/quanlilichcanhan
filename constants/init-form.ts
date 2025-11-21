@@ -4,8 +4,7 @@ export const initFormLogin = {
 };
 
 export const initFormSignup = {
-  full_name: "",
+  name: "",
   email: "",
   password: "",
-  confirmPassword: "",
 };
