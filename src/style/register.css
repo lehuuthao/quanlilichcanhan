@@ -1,0 +1,99 @@
+
+.register {
+    width: 100%;
+    height: calc(100vh - 100px);
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.khungRegister {
+    width: 400px;
+    height: auto;
+    box-shadow: 0px 0px 10px 0px white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;      
+    gap: 15px;                 
+}
+
+.khungRegister h2 {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Khung chứa input và icon */
+.khunginput {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;         
+    gap: 10px;                 
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0 10px;
+}
+
+.icon {
+    color: #666;
+    font-size: 20px;
+}
+
+.khunginput input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;              
+    font-size: 16px;
+}
+
+/* Nút đăng ký */
+.Btn_register {
+    width: 100%;
+    height: 40px;
+    background-color: #ee4d2d;    
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;             
+}
+
+/* Hiệu ứng hover cho nút */
+.Btn_register:hover {
+    background-color: #d73211;    
+}
+
+/* Phần login link */
+.Login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.Login p {
+    color: #666;
+}
+
+/* Link đăng nhập */
+.linkLogin {
+    color: #ee4d2d;
+    text-decoration: none;        /* Bỏ gạch chân */
+       background-image: linear-gradient(to right, rgba(0, 128, 0, 0.364) 0%, transparent 30%);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+
+.linkLogin:hover {
+    color: #d73211;
+ 
+    text-decoration: underline;   
+}
+
+
+

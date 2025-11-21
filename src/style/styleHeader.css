@@ -1,0 +1,62 @@
+.wrapper {
+  width: 100vw;
+  height: auto;
+  display: flex;
+  justify-self: center;
+  align-items: center;
+  background-color: aqua;
+  border-bottom: solid 1px black;
+}
+
+.logo{
+  width: 5%;
+  
+  width: 220px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search{
+  width: 65%; 
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.tacvu{
+  width: 20%;
+  height: 35px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tacvu .user-icon{
+  height: 20px;
+  width: 30px;
+}
+
+
+.search input{
+  width: 300px;
+  display: flex;
+  border-radius: 5px;
+}
+.search button{
+  border-radius: 5px;
+}
+.search .clear{
+ border-radius: 5px;
+}
+.search .loading{
+  border-radius: 5px;
+}
+.search .search-btn{
+  border-radius: 5px;
+  
+}
