@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* <Path> */
+.moon_img {
+  @apply hidden md:flex right-10 top-[80px] size-[160px] absolute xl:right-16 xl:top-[140px] xl:size-[220px];
+  background: radial-gradient(
+    50.97% 50.97% at 49.98% 50.05%,
+    #ffffff 0%,
+    #c0b3ff 75.8%,
+    #000000 100%
+  );
+  background-blend-mode: screen;
+  mix-blend-mode: screen;
+  filter: blur(6.5px);
+}
+
+@keyframes slide-down {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+.slide-down {
+  -webkit-animation: slide-down 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-down 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-up {
+  -webkit-animation: slide-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
