@@ -43,7 +43,6 @@ const Calendar: React.FC<CalendarProps> = () => {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Khi click vào ngày trống
   const handleDateClick = (arg: DateClickArg) => {
     setSelectedEvent({
       _id: "",
@@ -59,11 +58,9 @@ const Calendar: React.FC<CalendarProps> = () => {
     setModalOpen(true);
   };
 
-  // Khi click vào sự kiện
   const handleEventClick = (arg: EventClickArg) => {
     const e = arg.event;
 
-    // Lấy dữ liệu trực tiếp từ event
     setSelectedEvent({
       _id: e.id,
       title: e.title,
@@ -72,7 +69,7 @@ const Calendar: React.FC<CalendarProps> = () => {
       status: e.extendedProps.status,
       description: e.extendedProps.description,
       tags: e.extendedProps.tags || [],
-      userId: "", // có thể bỏ trống nếu không cần
+      userId: "",
       createdAt: "",
       updatedAt: "",
     });
@@ -136,11 +133,11 @@ const Calendar: React.FC<CalendarProps> = () => {
 
       {modalOpen && (
         <EventModal
-          event={selectedEvent || undefined} // pass undefined nếu chưa load
+          event={selectedEvent || undefined}
           mode={modalMode}
           onClose={() => setModalOpen(false)}
           onSaved={handleEventSaved}
-          loading={loadingEvent} // thêm prop loading
+          loading={loadingEvent}
           className="animate-slide-in rounded-2xl p-6 shadow-xl"
         />
       )}

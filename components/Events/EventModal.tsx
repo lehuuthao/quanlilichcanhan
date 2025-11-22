@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Button, toaster } from "evergreen-ui";
 import EventsService, {
   Event,
   CreateEventPayload,
   UpdateEventPayload,
 } from "@/services/events.service";
+import FormField from "@/components/FormField";
 
 interface EventModalProps {
   event?: Event;
@@ -62,12 +64,15 @@ const EventModal: React.FC<EventModalProps> = ({
       setSaving(true);
       if (mode === "create") {
         await EventsService.createEvent(form as CreateEventPayload);
+        toaster.success("Event created successfully!");
       } else if (event) {
         await EventsService.updateEvent(event._id, form as UpdateEventPayload);
+        toaster.success("Event updated successfully!");
       }
       onSaved();
     } catch (err) {
       console.error("Save event error:", err);
+      toaster.danger("Error saving event");
     } finally {
       setSaving(false);
     }
@@ -79,9 +84,11 @@ const EventModal: React.FC<EventModalProps> = ({
     try {
       setSaving(true);
       await EventsService.deleteEvent(event._id);
+      toaster.success("Event deleted successfully!");
       onSaved();
     } catch (err) {
       console.error("Delete event error:", err);
+      toaster.danger("Error deleting event");
     } finally {
       setSaving(false);
     }
@@ -92,88 +99,87 @@ const EventModal: React.FC<EventModalProps> = ({
       <div
         className={`bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4 ${className}`}
       >
-        {loading || !event ? (
-          <div className="text-center py-10">Loading...</div>
+        {loading ? (
+          <div className="text-center py-10 text-gray-500">Loading...</div>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
               {mode === "create" ? "Create Event" : "Edit Event"}
             </h2>
 
-            <input
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            <FormField
+              label="Title"
+              placeholder="Enter title"
               value={form.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="Title"
+              wrapperClass="mb-3"
+              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
             />
-            <textarea
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none h-20"
+
+            <FormField
+              label="Description"
+              placeholder="Enter description"
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
-              placeholder="Description"
+              isTextarea
+              rows={4}
+              wrapperClass="mb-3"
+              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              {["startTime", "endTime"].map((key) => (
-                <div key={key}>
-                  <label className="text-sm font-medium text-gray-700">
-                    {key === "startTime" ? "Start" : "End"}
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={form[key as keyof typeof form]}
-                    onChange={(e) =>
-                      handleChange(key as keyof typeof form, e.target.value)
-                    }
-                  />
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                label="Start"
+                type="datetime-local"
+                value={form.startTime}
+                onChange={(e) => handleChange("startTime", e.target.value)}
+                wrapperClass="mb-3"
+                customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              />
+              <FormField
+                label="End"
+                type="datetime-local"
+                value={form.endTime}
+                onChange={(e) => handleChange("endTime", e.target.value)}
+                wrapperClass="mb-3"
+                customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              />
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={form.status}
-                onChange={(e) =>
-                  handleChange(
-                    "status",
-                    e.target.value as "pending" | "completed" | "cancelled"
-                  )
-                }
-              >
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
+            <FormField
+              label="Status"
+              value={form.status}
+              onChange={(e) =>
+                handleChange(
+                  "status",
+                  e.target.value as "pending" | "completed" | "cancelled"
+                )
+              }
+              options={[
+                { label: "Pending", value: "pending" },
+                { label: "Completed", value: "completed" },
+                { label: "Cancelled", value: "cancelled" },
+              ]}
+              wrapperClass="mb-3"
+              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
+            />
 
-            <div className="flex justify-end gap-3 mt-2">
+            <div className="flex justify-end gap-3 mt-4">
               {mode === "edit" && (
-                <button
+                <Button
+                  intent="danger"
                   onClick={handleDelete}
                   disabled={saving}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 disabled:opacity-50"
                 >
                   Delete
-                </button>
+                </Button>
               )}
-              <button
-                onClick={onClose}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400"
-              >
+              <Button onClick={onClose} disabled={saving} appearance="minimal">
                 Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
-              >
+              </Button>
+              <Button onClick={handleSave} disabled={saving} intent="success">
                 {mode === "create" ? "Create" : "Update"}
-              </button>
+              </Button>
             </div>
           </>
         )}
