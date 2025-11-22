@@ -23,6 +23,9 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
     setUser(undefined);
   };
 
+  const token = getCookie(AUTH_KEY);
+  if (token) setRestAuth(String(token));
+
   const configureAuth = async () => {
     try {
       const resp = await UsersServices.getUserInfo();

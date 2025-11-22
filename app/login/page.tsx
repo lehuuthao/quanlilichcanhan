@@ -27,6 +27,7 @@ export default function Login() {
 
   const emailRef = createRef<FormFieldRef>();
   const passwordRef = createRef<FormFieldRef>();
+  const { configureAuth } = useContext(AppContext);
 
   const isFormValid = () => {
     return !emailRef.current?.validate() && !passwordRef.current?.validate();
@@ -49,8 +50,10 @@ export default function Login() {
           if (resp) {
             setRestAuth(resp.token);
             Cookie.set(AUTH_KEY, resp.token);
+            console.log("token", resp.token);
             router.push("/accounts");
             setUser(resp.user);
+            configureAuth();
           }
         })
         .catch((error) => {

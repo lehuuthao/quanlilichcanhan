@@ -16,14 +16,14 @@ export const RestClient = axios.create({
 export const setRestAuth = (token: string) => {
   if (!isNil(token)) {
     RestClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    RestClient.defaults.headers.common["authorization"] = `Bearer ${token}`;
+    // RestClient.defaults.headers.common["authorization"] = `Bearer ${token}`;
   }
 };
 
 // Hàm xóa token (logout/reset)
 export const deleteAuthorization = () => {
   delete RestClient.defaults.headers.common["Authorization"];
-  delete RestClient.defaults.headers.common["authorization"];
+  // delete RestClient.defaults.headers.common["authorization"];
 };
 
 // IDs để lưu test data giữa các test

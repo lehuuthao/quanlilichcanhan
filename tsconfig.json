@@ -32,7 +32,7 @@
     "utils/lodash.util.js",
     "tailwind.config.js",
     "app/tests/helpers.js"
-  ],
+, "app/test.js", "app/tests/runAlltest.tjs"  ],
   "exclude": ["node_modules"],
   "paths": {
     "react": ["./node_modules/@types/react"]
