@@ -8,17 +8,14 @@ const Routers =()=>{
     return(
         <BrowserRouter>
         <Routes>
-           <Route element={<LayoutMain/>}>
-                 <Route path="/" element={<Login/>}/>
-                 <Route path="/dangky" element={<Register/>}/>    
+            
+           <Route element={<LayoutMain/>}>         
                 <Route path="/home" element={<Home/>}/>
-                
-                
-
            </Route>
 
+             <Route path="/" element={<Login/>}/>
+             <Route path="/dangky" element={<Register/>}/>   
         </Routes>
-               
         </BrowserRouter>
 
         

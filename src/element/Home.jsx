@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react'; 
+import React, { useState, useCallback, useContext } from 'react'; 
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { EventsContext} from '../Layout/layoutMain.jsx';
 
 const localizer = momentLocalizer(moment);
 
@@ -9,14 +10,7 @@ const Calendar2 = () => {
   const [date, setDate] = useState(new Date(2025, 10, 15));
   const [view, setView] = useState('month');
 
-  const events = [
-    {
-      title: 'sự kien a',
-      start: new Date(2025, 10, 15, 10, 0, 0),
-      end: new Date(2025, 10, 15, 12, 0, 0),
-      
-    },
-  ];
+ const {events} = useContext(EventsContext);
 
   // Hàm xử lý khi người dùng bấm Next/Back/Today
   const onNavigate = useCallback((newDate) => {

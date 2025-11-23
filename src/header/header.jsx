@@ -16,13 +16,11 @@ const headers =()=>{
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/TikTok_logo.svg" alt="calendar" />
          </div>
          <div className='search'>
-            <input placeholder="Search accounts and videos" spellCheck={false} />
+            <input placeholder="Search" spellCheck={false} />
             <button className='clear'>
             <ClearIcon />
             </button>
-            <span className='loading'>
-            <LoadingIcon />
-            </span>
+           
             <button className='search-btn'>
             <SearchIcon />
             </button>

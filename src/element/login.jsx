@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import '../style/login.css'
-
+import { MdAccountCircle } from 'react-icons/md';
+import { RiLockPasswordFill } from 'react-icons/ri';
+import { Link } from 'react-router-dom';
+import '../style/login2.css'
 
 const FormLogin=()=>{
    const danhsach=[
@@ -75,10 +77,12 @@ const FormLogin=()=>{
                <div className="khungLogin">
                     <h2>Login</h2>
                     <div className="khunginput">
+                         <MdAccountCircle className="icon"/>
                         <input value={data.name} name="name" type="text" placeholder="Nhập tên"
                         onChange={Handle_onchang}/>
                     </div>
                     <div className="khunginput">
+                         <RiLockPasswordFill className="icon"/>
                         <input value={data.matkhau} name='matkhau' type="password" placeholder="Nhập mật khẩu"
                         onChange={Handle_onchang}/>
                     </div>
@@ -88,7 +92,7 @@ const FormLogin=()=>{
                     <button className="Btn_login" onClick={handleClick}>Login</button>
                     <div className="Register">
                         <p>Bạn đã có tài khoản chưa?</p>
-                        <Link to="/register" className="linkRegister">Đăng ký</Link>
+                        <Link to="/dangky" className="linkRegister">Đăng ký</Link>
                     </div>
                </div>
         </section>
