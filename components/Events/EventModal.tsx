@@ -70,7 +70,7 @@ const EventModal: React.FC<EventModalProps> = ({
         endTime: event.endTime,
         status: event.status,
         tags: event.tags?.map((t: any) => t._id) || [],
-        reminders: (event as any).reminders?.map((r: any) => r._id) || [],
+        reminders: (event as any).reminders?.map((r: any) => r.time) || [],
       });
       setCurrentEventId(event._id);
     }
@@ -109,9 +109,14 @@ const EventModal: React.FC<EventModalProps> = ({
           await RemindersService.deleteReminder(r._id);
         }
         for (const timeStr of form.reminders) {
+          if (!timeStr || isNaN(Date.parse(timeStr))) {
+            console.warn("Invalid reminder time:", timeStr);
+            continue;
+          }
+
           await RemindersService.createReminder({
             eventId: savedEvent._id,
-            time: timeStr,
+            time: new Date(timeStr).toISOString(),
           });
         }
       }

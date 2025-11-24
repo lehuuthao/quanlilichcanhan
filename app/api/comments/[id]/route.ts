@@ -1,11 +1,12 @@
-// app/api/comments/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectDatabase from "@/app/lib/mongo";
+
+import "@/app/api/_models/user";
 import Comment from "@/app/api/_models/comment";
+
 import { authenticate } from "@/app/middleware/auth";
 
-// DELETE comment theo id
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -31,13 +32,12 @@ export async function DELETE(
     });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message || "Internal Server Error" },
+      { message: err.message },
       { status: err.message === "Unauthorized" ? 401 : 500 }
     );
   }
 }
 
-// PUT cập nhật comment theo id
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -65,7 +65,7 @@ export async function PUT(
     return NextResponse.json({ comment: updated });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message || "Internal Server Error" },
+      { message: err.message },
       { status: err.message === "Unauthorized" ? 401 : 500 }
     );
   }

@@ -8,6 +8,7 @@ import {
   Spinner,
   toaster,
   Button,
+  Tooltip,
 } from "evergreen-ui";
 import { useTags } from "@/app/hooks/useTags";
 import { Tag } from "@/services/tags.service";
@@ -30,6 +31,8 @@ export const TagManager: React.FC<TagManagerProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingColor, setEditingColor] = useState("#5C7AEA");
+
+  const [hoveredId, setHoveredId] = useState<string | null>(null); // 👈 NEW
 
   const toggleSelect = (id: string) => {
     onSelect(
@@ -65,135 +68,154 @@ export const TagManager: React.FC<TagManagerProps> = ({
         name: editingName.trim(),
         color: editingColor,
       });
-      toaster.success("Tag updated!");
+      toaster.success("Updated!");
       setEditingId(null);
-      setEditingName("");
-      setEditingColor("#5C7AEA");
     } catch (err) {
-      toaster.danger("Failed to update tag");
+      toaster.danger("Failed to update");
       console.error(err);
     }
   };
 
   const handleDeleteTag = async (id: string) => {
-    if (!confirm("Are you sure to delete this tag?")) return;
+    if (!confirm("Delete this tag?")) return;
     try {
       await deleteTag(id);
-      toaster.success("Tag deleted!");
       onSelect(selected.filter((s) => s !== id));
+      toaster.success("Deleted!");
     } catch (err) {
-      toaster.danger("Failed to delete tag");
+      toaster.danger("Failed to delete");
       console.error(err);
     }
   };
 
   return (
     <Pane display="flex" flexDirection="column" gap={12}>
-      <Pane display="flex" flexWrap="wrap" gap={8}>
+      <Pane display="flex" flexWrap="wrap" gap={10}>
         {loading ? (
-          <Spinner size={16} />
+          <Spinner size={20} />
         ) : (
-          tags.map((tag) => (
-            <Pane
-              key={tag._id}
-              display="flex"
-              alignItems="center"
-              gap={6}
-              paddingX={12}
-              paddingY={6}
-              borderRadius={9999}
-              background={tag.color || "#E1E8F0"}
-              color={selected.includes(tag._id) ? "#fff" : "#000"}
-              border={
-                selected.includes(tag._id)
-                  ? "2px solid #5C7AEA"
-                  : "1px solid #ccc"
-              }
-              cursor="pointer"
-              userSelect="none"
-              transition="all 0.2s"
-            >
-              {editingId === tag._id ? (
-                <>
-                  <TextInput
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    width={120}
-                    height={30}
-                    paddingX={6}
-                    autoFocus
-                  />
-                  <input
-                    type="color"
-                    value={editingColor}
-                    onChange={(e) => setEditingColor(e.target.value)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      border: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                    }}
-                  />
-                  <IconButton
-                    icon={TickIcon}
-                    onClick={handleUpdateTag}
-                    size="small"
-                  />
-                  <IconButton
-                    icon={CrossIcon}
-                    onClick={() => setEditingId(null)}
-                    size="small"
-                  />
-                </>
-              ) : (
-                <>
-                  <span
-                    onClick={() => toggleSelect(tag._id)}
-                    style={{ fontWeight: 500 }}
-                  >
-                    {tag.name}
-                  </span>
-                  <IconButton
-                    icon={EditIcon}
-                    onClick={() => startEdit(tag)}
-                    size="small"
-                  />
-                  <IconButton
-                    icon={TrashIcon}
-                    onClick={() => handleDeleteTag(tag._id)}
-                    intent="danger"
-                    size="small"
-                  />
-                </>
-              )}
-            </Pane>
-          ))
+          tags.map((tag) => {
+            const isSelected = selected.includes(tag._id);
+            const isHovered = hoveredId === tag._id;
+
+            return (
+              <Pane
+                key={tag._id}
+                display="flex"
+                alignItems="center"
+                gap={8}
+                paddingX={14}
+                paddingY={8}
+                borderRadius={999}
+                background={tag.color ? `${tag.color}22` : "#E9EEF7"}
+                border={
+                  isSelected
+                    ? `2px solid ${tag.color || "#5C7AEA"}`
+                    : "1px solid #D0D7E2"
+                }
+                cursor="pointer"
+                onMouseEnter={() => setHoveredId(tag._id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={() => toggleSelect(tag._id)}
+                style={{
+                  transition: "0.15s",
+                  minWidth: 90,
+                  userSelect: "none",
+                }}
+              >
+                <span style={{ color: "#1A1F36", fontWeight: 500, flex: 1 }}>
+                  {tag.name}
+                </span>
+
+                {/* SHOW ON HOVER */}
+                {isHovered && (
+                  <Pane display="flex" gap={4}>
+                    <Tooltip content="Edit">
+                      <IconButton
+                        icon={EditIcon}
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(tag);
+                        }}
+                      />
+                    </Tooltip>
+
+                    <Tooltip content="Delete">
+                      <IconButton
+                        icon={TrashIcon}
+                        size="small"
+                        intent="danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTag(tag._id);
+                        }}
+                      />
+                    </Tooltip>
+                  </Pane>
+                )}
+              </Pane>
+            );
+          })
         )}
       </Pane>
 
-      {/* Add new tag */}
-      <Pane display="flex" gap={6} alignItems="center">
+      {/* EDITING FORM */}
+      {editingId && (
+        <Pane display="flex" gap={10} alignItems="center" paddingTop={6}>
+          <TextInput
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            height={34}
+            width={150}
+          />
+
+          <input
+            type="color"
+            value={editingColor}
+            onChange={(e) => setEditingColor(e.target.value)}
+            style={{
+              width: 36,
+              height: 36,
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
+            }}
+          />
+
+          <IconButton
+            icon={TickIcon}
+            intent="success"
+            onClick={handleUpdateTag}
+          />
+          <IconButton icon={CrossIcon} onClick={() => setEditingId(null)} />
+        </Pane>
+      )}
+
+      {/* ADD TAG */}
+      <Pane display="flex" gap={10} alignItems="center" marginTop={10}>
         <TextInput
-          placeholder="New tag"
+          placeholder="New tag..."
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
-          height={34}
-          width={140}
+          height={36}
+          width={180}
         />
+
         <input
           type="color"
           value={newTagColor}
           onChange={(e) => setNewTagColor(e.target.value)}
           style={{
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             border: "none",
-            padding: 0,
+            borderRadius: 6,
             cursor: "pointer",
           }}
         />
-        <Button onClick={handleAddTag} intent="success" height={34}>
+
+        <Button height={36} appearance="primary" onClick={handleAddTag}>
           Add Tag
         </Button>
       </Pane>

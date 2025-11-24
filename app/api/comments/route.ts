@@ -2,7 +2,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectDatabase from "@/app/lib/mongo";
+
+// Đăng ký model TRƯỚC KHI authenticate
+import "@/app/api/_models/user";
+import "@/app/api/_models/event";
 import Comment from "@/app/api/_models/comment";
+
 import { authenticate } from "@/app/middleware/auth";
 
 export async function POST(request: NextRequest) {
@@ -23,7 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ comment });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message || "Internal Server Error" },
+      { message: err.message },
       { status: err.message === "Unauthorized" ? 401 : 500 }
     );
   }
@@ -32,7 +37,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     await connectDatabase();
-    await authenticate(request); // chỉ cần xác thực, không cần userId để lọc
+    await authenticate(request);
+
     const eventId = request.nextUrl.searchParams.get("eventId");
     if (!eventId)
       return NextResponse.json({ message: "Missing eventId" }, { status: 400 });
@@ -44,7 +50,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ comments });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message || "Internal Server Error" },
+      { message: err.message },
       { status: err.message === "Unauthorized" ? 401 : 500 }
     );
   }
