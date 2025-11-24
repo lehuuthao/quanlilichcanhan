@@ -76,6 +76,7 @@ const EventModal: React.FC<EventModalProps> = ({
       if (mode === "create") {
         await EventsService.createEvent(form as CreateEventPayload);
         toaster.success("Event created successfully!");
+        onClose();
       } else if (event) {
         await EventsService.updateEvent(event._id, form as UpdateEventPayload);
         toaster.success("Event updated successfully!");
@@ -97,6 +98,7 @@ const EventModal: React.FC<EventModalProps> = ({
       await EventsService.deleteEvent(event._id);
       toaster.success("Event deleted successfully!");
       onSaved();
+      onClose();
     } catch (err) {
       console.error(err);
       toaster.danger("Error deleting event");
