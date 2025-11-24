@@ -1,4 +1,3 @@
-// components/Calendar.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,16 +7,12 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { EventClickArg } from "@fullcalendar/core";
 import EventsService, { Event as MyEvent } from "@/services/events.service";
+import { Tag } from "@/services/tags.service";
 import EventModal from "./EventModal";
 
-interface CalendarProps {}
-
-const Calendar: React.FC<CalendarProps> = () => {
+const Calendar: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<MyEvent | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [loadingEvent, setLoadingEvent] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -30,7 +25,7 @@ const Calendar: React.FC<CalendarProps> = () => {
         extendedProps: {
           description: ev.description,
           status: ev.status,
-          tags: ev.tags,
+          tags: ev.tags || [],
         },
       }));
       setEvents(mapped);
@@ -54,13 +49,10 @@ const Calendar: React.FC<CalendarProps> = () => {
       createdAt: "",
       updatedAt: "",
     });
-    setModalMode("create");
-    setModalOpen(true);
   };
 
   const handleEventClick = (arg: EventClickArg) => {
     const e = arg.event;
-
     setSelectedEvent({
       _id: e.id,
       title: e.title,
@@ -73,14 +65,6 @@ const Calendar: React.FC<CalendarProps> = () => {
       createdAt: "",
       updatedAt: "",
     });
-
-    setModalMode("edit");
-    setModalOpen(true);
-  };
-
-  const handleEventSaved = () => {
-    setModalOpen(false);
-    fetchEvents();
   };
 
   return (
@@ -97,11 +81,9 @@ const Calendar: React.FC<CalendarProps> = () => {
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         editable={true}
-        eventContent={(arg) => {
-          const { event } = arg;
+        eventContent={({ event }) => {
           const status = event.extendedProps.status;
-          const tags = event.extendedProps.tags as string[] | undefined;
-
+          const tags: Tag[] = event.extendedProps.tags || [];
           const bgColor =
             status === "completed"
               ? "bg-green-500"
@@ -111,17 +93,18 @@ const Calendar: React.FC<CalendarProps> = () => {
 
           return (
             <div
-              className={`p-1 rounded-md text-sm text-white cursor-pointer ${bgColor} hover:scale-105 transition-transform duration-150`}
+              className={`p-1 rounded-md text-sm text-white cursor-pointer ${bgColor}`}
             >
               <div className="font-semibold truncate">{event.title}</div>
-              {tags && tags.length > 0 && (
+              {tags.length > 0 && (
                 <div className="flex gap-1 mt-1 flex-wrap">
-                  {tags.map((tag: string) => (
+                  {tags.map((tag) => (
                     <span
-                      key={tag}
-                      className="bg-white/30 text-xs px-1 rounded-full"
+                      key={tag._id}
+                      className="text-xs px-1 rounded-full"
+                      style={{ backgroundColor: tag.color }}
                     >
-                      {tag}
+                      {tag.name}
                     </span>
                   ))}
                 </div>
@@ -131,14 +114,12 @@ const Calendar: React.FC<CalendarProps> = () => {
         }}
       />
 
-      {modalOpen && (
+      {selectedEvent && (
         <EventModal
-          event={selectedEvent || undefined}
-          mode={modalMode}
-          onClose={() => setModalOpen(false)}
-          onSaved={handleEventSaved}
-          loading={loadingEvent}
-          className="animate-slide-in rounded-2xl p-6 shadow-xl"
+          event={selectedEvent}
+          mode={selectedEvent._id ? "edit" : "create"}
+          onClose={() => setSelectedEvent(null)}
+          onSaved={fetchEvents}
         />
       )}
     </div>

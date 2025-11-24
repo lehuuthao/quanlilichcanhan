@@ -2,7 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectDatabase from "@/app/lib/mongo";
-import Tag from "@/app/api/_models/tag";
+import { Event, Tag } from "@/app/api/_models/event";
+
 import { authenticate } from "@/app/middleware/auth";
 
 // GET tag theo id

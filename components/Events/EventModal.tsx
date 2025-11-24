@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, toaster } from "evergreen-ui";
+import { Button, toaster, Spinner, Pane } from "evergreen-ui";
 import EventsService, {
   Event,
   CreateEventPayload,
   UpdateEventPayload,
 } from "@/services/events.service";
-import FormField from "@/components/FormField";
+import TagsService, { Tag } from "@/services/tags.service";
+import FormField from "../FormField";
+import { TagManager } from "../TagManager";
 
 interface EventModalProps {
   event?: Event;
   mode: "create" | "edit";
   onClose: () => void;
   onSaved: () => void;
-  className?: string;
-  loading?: boolean;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -23,8 +23,6 @@ const EventModal: React.FC<EventModalProps> = ({
   mode,
   onClose,
   onSaved,
-  className = "",
-  loading = false,
 }) => {
   const [form, setForm] = useState({
     title: "",
@@ -32,10 +30,30 @@ const EventModal: React.FC<EventModalProps> = ({
     startTime: "",
     endTime: "",
     status: "pending" as "pending" | "completed" | "cancelled",
+    tags: [] as string[],
   });
-  const [saving, setSaving] = useState(false);
+  const [savingEvent, setSavingEvent] = useState(false);
+  const [deletingEvent, setDeletingEvent] = useState(false);
+
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [loadingTags, setLoadingTags] = useState(false);
 
   useEffect(() => {
+    const loadTags = async () => {
+      setLoadingTags(true);
+      try {
+        const res = await TagsService.getTags();
+        setAllTags(res.tags);
+      } catch (err) {
+        console.error(err);
+        toaster.danger("Failed to load tags");
+      } finally {
+        setLoadingTags(false);
+      }
+    };
+
+    loadTags();
+
     if (event) {
       setForm({
         title: event.title,
@@ -43,146 +61,126 @@ const EventModal: React.FC<EventModalProps> = ({
         startTime: event.startTime,
         endTime: event.endTime,
         status: event.status,
-      });
-    } else {
-      setForm({
-        title: "",
-        description: "",
-        startTime: "",
-        endTime: "",
-        status: "pending",
+        tags: event.tags?.map((t: any) => t._id) || [],
       });
     }
   }, [event]);
 
-  const handleChange = (key: keyof typeof form, value: string) => {
+  const handleChange = (key: keyof typeof form, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = async () => {
     try {
-      setSaving(true);
+      setSavingEvent(true);
       if (mode === "create") {
         await EventsService.createEvent(form as CreateEventPayload);
         toaster.success("Event created successfully!");
       } else if (event) {
         await EventsService.updateEvent(event._id, form as UpdateEventPayload);
         toaster.success("Event updated successfully!");
+        onClose();
       }
       onSaved();
     } catch (err) {
-      console.error("Save event error:", err);
+      console.error(err);
       toaster.danger("Error saving event");
     } finally {
-      setSaving(false);
+      setSavingEvent(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!event || !confirm("Are you sure you want to delete this event?"))
-      return;
+    if (!event || !confirm("Are you sure?")) return;
     try {
-      setSaving(true);
+      setDeletingEvent(true);
       await EventsService.deleteEvent(event._id);
       toaster.success("Event deleted successfully!");
       onSaved();
     } catch (err) {
-      console.error("Delete event error:", err);
+      console.error(err);
       toaster.danger("Error deleting event");
     } finally {
-      setSaving(false);
+      setDeletingEvent(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div
-        className={`bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4 ${className}`}
-      >
-        {loading ? (
-          <div className="text-center py-10 text-gray-500">Loading...</div>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4 overflow-auto max-h-[90vh]">
+        <h2 className="text-2xl font-bold">
+          {mode === "create" ? "Create Event" : "Edit Event"}
+        </h2>
+
+        <FormField
+          label="Title"
+          value={form.title}
+          onChange={(e) => handleChange("title", e.target.value)}
+        />
+        <FormField
+          label="Description"
+          value={form.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+          isTextarea
+          rows={4}
+        />
+        <FormField
+          label="Start"
+          type="datetime-local"
+          value={form.startTime}
+          onChange={(e) => handleChange("startTime", e.target.value)}
+        />
+        <FormField
+          label="End"
+          type="datetime-local"
+          value={form.endTime}
+          onChange={(e) => handleChange("endTime", e.target.value)}
+        />
+        <FormField
+          label="Status"
+          value={form.status}
+          onChange={(e) => handleChange("status", e.target.value as any)}
+          options={[
+            { label: "Pending", value: "pending" },
+            { label: "Completed", value: "completed" },
+            { label: "Cancelled", value: "cancelled" },
+          ]}
+        />
+
+        {/* Tag Manager với loading */}
+        {loadingTags ? (
+          <Pane display="flex" justifyContent="center" paddingY={10}>
+            <Spinner size={20} />
+          </Pane>
         ) : (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              {mode === "create" ? "Create Event" : "Edit Event"}
-            </h2>
-
-            <FormField
-              label="Title"
-              placeholder="Enter title"
-              value={form.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              wrapperClass="mb-3"
-              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
-            />
-
-            <FormField
-              label="Description"
-              placeholder="Enter description"
-              value={form.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              isTextarea
-              rows={4}
-              wrapperClass="mb-3"
-              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                label="Start"
-                type="datetime-local"
-                value={form.startTime}
-                onChange={(e) => handleChange("startTime", e.target.value)}
-                wrapperClass="mb-3"
-                customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
-              />
-              <FormField
-                label="End"
-                type="datetime-local"
-                value={form.endTime}
-                onChange={(e) => handleChange("endTime", e.target.value)}
-                wrapperClass="mb-3"
-                customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
-              />
-            </div>
-
-            <FormField
-              label="Status"
-              value={form.status}
-              onChange={(e) =>
-                handleChange(
-                  "status",
-                  e.target.value as "pending" | "completed" | "cancelled"
-                )
-              }
-              options={[
-                { label: "Pending", value: "pending" },
-                { label: "Completed", value: "completed" },
-                { label: "Cancelled", value: "cancelled" },
-              ]}
-              wrapperClass="mb-3"
-              customClass="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-300"
-            />
-
-            <div className="flex justify-end gap-3 mt-4">
-              {mode === "edit" && (
-                <Button
-                  intent="danger"
-                  onClick={handleDelete}
-                  disabled={saving}
-                >
-                  Delete
-                </Button>
-              )}
-              <Button onClick={onClose} disabled={saving} appearance="minimal">
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={saving} intent="success">
-                {mode === "create" ? "Create" : "Update"}
-              </Button>
-            </div>
-          </>
+          <TagManager
+            selected={form.tags}
+            onSelect={(ids) => handleChange("tags", ids)}
+          />
         )}
+
+        <div className="flex justify-end gap-3 mt-4">
+          {mode === "edit" && (
+            <Button
+              intent="danger"
+              onClick={handleDelete}
+              disabled={deletingEvent}
+            >
+              {deletingEvent ? <Spinner size={16} /> : "Delete Event"}
+            </Button>
+          )}
+          <Button onClick={onClose} disabled={savingEvent} appearance="minimal">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={savingEvent}
+            intent="success"
+            iconBefore={savingEvent ? <Spinner size={16} /> : undefined}
+          >
+            {mode === "create" ? "Create Event" : "Update Event"}
+          </Button>
+        </div>
       </div>
     </div>
   );

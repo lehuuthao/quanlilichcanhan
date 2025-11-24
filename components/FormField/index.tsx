@@ -39,7 +39,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   labelClass?: string;
   rows?: number;
   prefixClassName?: string;
-  options?: Option[]; // Nếu có thì render select
+  options?: Option[];
+  isMulti?: boolean;
+  value?: string | string[];
   inputProps?: InputHTMLAttributes<HTMLInputElement>;
   textareaProps?: TextareaHTMLAttributes<HTMLTextAreaElement>;
   selectProps?: SelectHTMLAttributes<HTMLSelectElement>;
@@ -75,6 +77,7 @@ const FormField = forwardRef((props: Props, ref) => {
     min,
     max,
     options,
+    isMulti = false, // <-- default false
     ...rest
   } = props;
 
@@ -127,9 +130,20 @@ const FormField = forwardRef((props: Props, ref) => {
       <select
         className={`${customClass} border rounded-md px-3 py-2 w-full`}
         value={value}
-        onChange={onChange}
+        onChange={(e) => {
+          if (isMulti) {
+            const selectedValues = Array.from(
+              e.target.selectedOptions,
+              (option: any) => option.value
+            );
+            onChange?.({ target: { value: selectedValues } });
+          } else {
+            onChange?.(e);
+          }
+        }}
         disabled={disabled}
         required={required}
+        multiple={isMulti}
         {...(safeRest as React.SelectHTMLAttributes<HTMLSelectElement>)}
       >
         {options.map((opt) => (
@@ -143,7 +157,7 @@ const FormField = forwardRef((props: Props, ref) => {
     inputElement = (
       <textarea
         className={`${customClass} border focus:!bg-white w-full rounded text-xs px-3 py-2`}
-        value={value}
+        value={value as string}
         disabled={disabled}
         placeholder={placeholder}
         readOnly={readOnly}
@@ -170,7 +184,7 @@ const FormField = forwardRef((props: Props, ref) => {
         <input
           className={`${customClass} bg-rafl_violet-100 placeholder-rafl_violet-400 text-rafl_violet-950 h-[60px] focus:!bg-white w-full rounded-2xl text-2xl leading-6 px-6 py-[18px] !border-none !outline-none`}
           type={type}
-          value={value}
+          value={value as string}
           disabled={disabled}
           placeholder={placeholder}
           readOnly={readOnly}

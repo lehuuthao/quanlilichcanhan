@@ -1,5 +1,28 @@
+// /app/api/_models/models.ts
 import mongoose, { Document, Schema } from "mongoose";
 
+// ===== Tag =====
+export interface ITag extends Document {
+  userId: mongoose.Types.ObjectId;
+  name: string;
+  color: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const tagSchema: Schema = new mongoose.Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    name: { type: String, required: true },
+    color: { type: String, default: "#000000" },
+  },
+  { timestamps: true }
+);
+
+export const Tag =
+  mongoose.models.Tag || mongoose.model<ITag>("Tag", tagSchema);
+
+// ===== Event =====
 export interface IEvent extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
@@ -29,6 +52,5 @@ const eventSchema: Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Event =
+export const Event =
   mongoose.models.Event || mongoose.model<IEvent>("Event", eventSchema);
-export default Event;
