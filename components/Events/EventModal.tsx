@@ -10,6 +10,8 @@ import EventsService, {
 import TagsService, { Tag } from "@/services/tags.service";
 import FormField from "../FormField";
 import { TagManager } from "../TagManager";
+import { ReminderManager } from "../ReminderManager";
+import RemindersService from "@/services/reminders.service";
 
 interface EventModalProps {
   event?: Event;
@@ -31,13 +33,20 @@ const EventModal: React.FC<EventModalProps> = ({
     endTime: "",
     status: "pending" as "pending" | "completed" | "cancelled",
     tags: [] as string[],
+    reminders: [] as string[],
   });
+
   const [savingEvent, setSavingEvent] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
 
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [loadingTags, setLoadingTags] = useState(false);
 
+  const [currentEventId, setCurrentEventId] = useState<string | null>(
+    event?._id || null
+  );
+
+  // Load tags và set form nếu edit
   useEffect(() => {
     const loadTags = async () => {
       setLoadingTags(true);
@@ -62,7 +71,9 @@ const EventModal: React.FC<EventModalProps> = ({
         endTime: event.endTime,
         status: event.status,
         tags: event.tags?.map((t: any) => t._id) || [],
+        reminders: (event as any).reminders?.map((r: any) => r._id) || [],
       });
+      setCurrentEventId(event._id);
     }
   }, [event]);
 
@@ -73,16 +84,39 @@ const EventModal: React.FC<EventModalProps> = ({
   const handleSave = async () => {
     try {
       setSavingEvent(true);
+      let savedEvent: Event | null | any = null;
+
       if (mode === "create") {
-        await EventsService.createEvent(form as CreateEventPayload);
+        savedEvent = await EventsService.createEvent(
+          form as CreateEventPayload
+        );
+        setCurrentEventId(savedEvent._id);
         toaster.success("Event created successfully!");
-        onClose();
       } else if (event) {
-        await EventsService.updateEvent(event._id, form as UpdateEventPayload);
+        savedEvent = await EventsService.updateEvent(
+          event._id,
+          form as UpdateEventPayload
+        );
         toaster.success("Event updated successfully!");
-        onClose();
+      }
+
+      if (savedEvent) {
+        const existing = await RemindersService.getReminders();
+        const eventReminders = existing.reminders.filter(
+          (r) => r.eventId === savedEvent!._id
+        );
+        for (const r of eventReminders) {
+          await RemindersService.deleteReminder(r._id);
+        }
+        for (const timeStr of form.reminders) {
+          await RemindersService.createReminder({
+            eventId: savedEvent._id,
+            time: timeStr,
+          });
+        }
       }
       onSaved();
+      onClose();
     } catch (err) {
       console.error(err);
       toaster.danger("Error saving event");
@@ -92,10 +126,10 @@ const EventModal: React.FC<EventModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!event || !confirm("Are you sure?")) return;
+    if (!currentEventId || !confirm("Are you sure?")) return;
     try {
       setDeletingEvent(true);
-      await EventsService.deleteEvent(event._id);
+      await EventsService.deleteEvent(currentEventId);
       toaster.success("Event deleted successfully!");
       onSaved();
       onClose();
@@ -149,7 +183,7 @@ const EventModal: React.FC<EventModalProps> = ({
           ]}
         />
 
-        {/* Tag Manager với loading */}
+        {/* Tag Manager */}
         {loadingTags ? (
           <Pane display="flex" justifyContent="center" paddingY={10}>
             <Spinner size={20} />
@@ -161,8 +195,21 @@ const EventModal: React.FC<EventModalProps> = ({
           />
         )}
 
+        {/* Reminder Manager */}
+        {currentEventId && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Reminders</h3>
+            <ReminderManager
+              key={currentEventId} // force reload khi eventId thay đổi
+              selected={form.reminders}
+              onSelect={(ids) => handleChange("reminders", ids)}
+              eventId={currentEventId}
+            />
+          </div>
+        )}
+
         <div className="flex justify-end gap-3 mt-4">
-          {mode === "edit" && (
+          {mode === "edit" && currentEventId && (
             <Button
               intent="danger"
               onClick={handleDelete}

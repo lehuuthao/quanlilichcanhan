@@ -1,8 +1,7 @@
-// app/api/reminders/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import connectDatabase from "@/app/lib/mongo";
-import Reminder from "@/app/api/_models/reminder";
 import { authenticate } from "@/app/middleware/auth";
+import Reminder from "../../_models/reminder";
 
 export async function DELETE(
   request: NextRequest,
@@ -11,12 +10,15 @@ export async function DELETE(
   try {
     await connectDatabase();
     await authenticate(request);
+
     const deleted = await Reminder.findByIdAndDelete(params.id);
-    if (!deleted)
+    if (!deleted) {
       return NextResponse.json(
         { message: "Reminder not found" },
         { status: 404 }
       );
+    }
+
     return NextResponse.json({ message: "Reminder deleted successfully." });
   } catch (err: any) {
     return NextResponse.json(

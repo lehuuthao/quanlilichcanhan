@@ -1,17 +1,14 @@
-// app/api/reminders/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectDatabase from "@/app/lib/mongo";
-import Reminder from "@/app/api/_models/reminder";
 import { authenticate } from "@/app/middleware/auth";
+import Reminder from "../_models/reminder";
 
 export async function POST(request: NextRequest) {
   try {
     await connectDatabase();
-
     const user = await authenticate(request);
 
-    // Parse JSON body
     let body;
     try {
       body = await request.json();
@@ -31,9 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Tạo reminder
+    // Tạo reminder liên kết với eventId
     const reminder = await Reminder.create({
-      userId: new mongoose.Types.ObjectId(user._id),
       eventId: new mongoose.Types.ObjectId(eventId),
       time: new Date(time),
     });
@@ -50,13 +46,18 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     await connectDatabase();
-
     const user = await authenticate(request);
 
-    // Lấy tất cả reminder của user
-    const reminders = await Reminder.find({
-      userId: new mongoose.Types.ObjectId(user._id),
-    }).sort({ time: 1 }); // sắp xếp theo thời gian tăng dần
+    const url = new URL(request.url);
+    const eventId = url.searchParams.get("eventId");
+
+    let query: any = {};
+    if (eventId) {
+      query.eventId = new mongoose.Types.ObjectId(eventId);
+    }
+
+    // Lấy reminder, có thể filter theo eventId nếu được cung cấp
+    const reminders = await Reminder.find(query).sort({ time: 1 });
 
     return NextResponse.json({ reminders });
   } catch (err: any) {
