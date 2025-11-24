@@ -12,6 +12,7 @@ import FormField from "../FormField";
 import { TagManager } from "../TagManager";
 import { ReminderManager } from "../ReminderManager";
 import RemindersService from "@/services/reminders.service";
+import { CommentManager } from "../CommentManager";
 
 interface EventModalProps {
   event?: Event;
@@ -38,10 +39,8 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const [savingEvent, setSavingEvent] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
-
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [loadingTags, setLoadingTags] = useState(false);
-
   const [currentEventId, setCurrentEventId] = useState<string | null>(
     event?._id || null
   );
@@ -101,6 +100,7 @@ const EventModal: React.FC<EventModalProps> = ({
       }
 
       if (savedEvent) {
+        // Sync reminders
         const existing = await RemindersService.getReminders();
         const eventReminders = existing.reminders.filter(
           (r) => r.eventId === savedEvent!._id
@@ -142,65 +142,81 @@ const EventModal: React.FC<EventModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4 overflow-auto max-h-[90vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose} // click outside modal để đóng
+    >
+      <div
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 flex flex-col gap-6 overflow-auto max-h-[90vh] relative"
+        onClick={(e) => e.stopPropagation()} // tránh close khi click bên trong
+      >
         <h2 className="text-2xl font-bold">
           {mode === "create" ? "Create Event" : "Edit Event"}
         </h2>
 
-        <FormField
-          label="Title"
-          value={form.title}
-          onChange={(e) => handleChange("title", e.target.value)}
-        />
-        <FormField
-          label="Description"
-          value={form.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          isTextarea
-          rows={4}
-        />
-        <FormField
-          label="Start"
-          type="datetime-local"
-          value={form.startTime}
-          onChange={(e) => handleChange("startTime", e.target.value)}
-        />
-        <FormField
-          label="End"
-          type="datetime-local"
-          value={form.endTime}
-          onChange={(e) => handleChange("endTime", e.target.value)}
-        />
-        <FormField
-          label="Status"
-          value={form.status}
-          onChange={(e) => handleChange("status", e.target.value as any)}
-          options={[
-            { label: "Pending", value: "pending" },
-            { label: "Completed", value: "completed" },
-            { label: "Cancelled", value: "cancelled" },
-          ]}
-        />
-
-        {/* Tag Manager */}
-        {loadingTags ? (
-          <Pane display="flex" justifyContent="center" paddingY={10}>
-            <Spinner size={20} />
-          </Pane>
-        ) : (
-          <TagManager
-            selected={form.tags}
-            onSelect={(ids) => handleChange("tags", ids)}
+        {/* Form */}
+        <div className="flex flex-col gap-4">
+          <FormField
+            label="Title"
+            value={form.title}
+            onChange={(e) => handleChange("title", e.target.value)}
           />
-        )}
+          <FormField
+            label="Description"
+            value={form.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            isTextarea
+            rows={4}
+          />
 
-        {/* Reminder Manager */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              label="Start"
+              type="datetime-local"
+              value={form.startTime}
+              onChange={(e) => handleChange("startTime", e.target.value)}
+            />
+            <FormField
+              label="End"
+              type="datetime-local"
+              value={form.endTime}
+              onChange={(e) => handleChange("endTime", e.target.value)}
+            />
+          </div>
+
+          <FormField
+            label="Status"
+            value={form.status}
+            onChange={(e) => handleChange("status", e.target.value as any)}
+            options={[
+              { label: "Pending", value: "pending" },
+              { label: "Completed", value: "completed" },
+              { label: "Cancelled", value: "cancelled" },
+            ]}
+          />
+        </div>
+
+        {/* Tags */}
+        <div className="p-4 border rounded-lg bg-gray-50 shadow-inner">
+          <h3 className="font-semibold mb-2 text-gray-700">Tags</h3>
+          {loadingTags ? (
+            <Pane display="flex" justifyContent="center" paddingY={10}>
+              <Spinner size={20} />
+            </Pane>
+          ) : (
+            <TagManager
+              selected={form.tags}
+              onSelect={(ids) => handleChange("tags", ids)}
+            />
+          )}
+        </div>
+
+        {/* Reminders */}
         {currentEventId && (
-          <div className="mt-4">
-            <h3 className="font-semibold mb-2">Reminders</h3>
+          <div className="p-4 border rounded-lg bg-gray-50 shadow-inner">
+            <h3 className="font-semibold mb-2 text-gray-700">Reminders</h3>
             <ReminderManager
-              key={currentEventId} // force reload khi eventId thay đổi
+              key={currentEventId}
               selected={form.reminders}
               onSelect={(ids) => handleChange("reminders", ids)}
               eventId={currentEventId}
@@ -208,6 +224,15 @@ const EventModal: React.FC<EventModalProps> = ({
           </div>
         )}
 
+        {/* Comments */}
+        {currentEventId && (
+          <div className="p-4 border rounded-lg bg-gray-50 shadow-inner">
+            <h3 className="font-semibold mb-2 text-gray-700">Comments</h3>
+            <CommentManager eventId={currentEventId} />
+          </div>
+        )}
+
+        {/* Actions */}
         <div className="flex justify-end gap-3 mt-4">
           {mode === "edit" && currentEventId && (
             <Button
