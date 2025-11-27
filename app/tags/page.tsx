@@ -16,7 +16,7 @@ export default function TagsPage() {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen min-w-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white w-full p-6 flex flex-col md:flex-row justify-between items-center sticky top-0 z-20 border-b border-gray-200">
         {/* Title */}
@@ -66,7 +66,7 @@ export default function TagsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 w-[95%] md:w-[60%] h-full justify-center mx-auto mt-10 mb-10">
+      <main className="flex-1 w-[95%] md:w-[70%] lg:w-[68%] h-full justify-center mx-auto mt-10 mb-10">
         <Calendar />
       </main>
     </div>

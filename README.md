@@ -9,6 +9,9 @@
 - Reminder cho các sự kiện quan trọng
 - AuditLog (Admin)
 - Giao diện trực quan, responsive, thân thiện người dùng
+- Đăng nhập
+- Đăng kí
+- Đăng xuất
 
 ---
 
