@@ -21,7 +21,7 @@ const Account = () => {
       <div className="flex flex-col items-center w-full gap-y-8 md:gap-y-16 max-w-[1040px]">
         <div className="flex items-center justify-center w-full max-w-[664px] px-4 lg:px-0">
           <h1 className="text-center text-[64px] leading-[66px] md:leading-[80px] md:text-[75px] lg:text-[96px] lg:leading-[90px] font-black text-rafl_violet-50 tracking-[-3px]">
-            welcome back, {user?.fullName || user?.userName}
+            welcome back, {user?.name || user?.role}
           </h1>
         </div>
         <div className="flex flex-col gap-y-4 w-full items-center px-6">

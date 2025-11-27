@@ -30,7 +30,7 @@ const Calendar: React.FC = () => {
       }));
       setEvents(mapped);
     } catch (err) {
-      console.error("Fetch events error:", err);
+      // console.error("Fetch events error:", err);
     }
   }, []);
 
@@ -52,19 +52,22 @@ const Calendar: React.FC = () => {
   };
 
   const handleEventClick = (arg: EventClickArg) => {
+    setSelectedEvent(null); // reset state trước
     const e = arg.event;
-    setSelectedEvent({
-      _id: e.id,
-      title: e.title,
-      startTime: e.startStr,
-      endTime: e.endStr,
-      status: e.extendedProps.status,
-      description: e.extendedProps.description,
-      tags: e.extendedProps.tags || [],
-      userId: "",
-      createdAt: "",
-      updatedAt: "",
-    });
+    setTimeout(() => {
+      setSelectedEvent({
+        _id: e.id,
+        title: e.title,
+        startTime: e.startStr,
+        endTime: e.endStr,
+        status: e.extendedProps.status,
+        description: e.extendedProps.description,
+        tags: e.extendedProps.tags || [],
+        userId: "",
+        createdAt: "",
+        updatedAt: "",
+      });
+    }, 0);
   };
 
   return (
@@ -81,21 +84,46 @@ const Calendar: React.FC = () => {
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         editable={true}
+        selectable={true}
+        selectMirror={true}
         eventContent={({ event }) => {
           const status = event.extendedProps.status;
           const tags: Tag[] = event.extendedProps.tags || [];
           const bgColor =
             status === "completed"
-              ? "bg-green-500"
+              ? "bg-rafl_green-400"
               : status === "pending"
-              ? "bg-yellow-500"
-              : "bg-gray-500";
+              ? "bg-rafl_yellow-400"
+              : "bg-rafl_red-600";
 
           return (
             <div
-              className={`p-1 rounded-md text-sm text-white cursor-pointer ${bgColor}`}
+              className={`p-1 py-1 rounded-[3px] text-sm w-full text-white cursor-pointer ${bgColor}`}
             >
               <div className="font-semibold truncate">{event.title}</div>
+
+              <div className="text-xs mt-1 text-white/80">
+                {new Date(event.start!).toLocaleDateString(undefined, {
+                  day: "2-digit",
+                  month: "short",
+                })}
+                ,{" "}
+                {new Date(event.start!).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                {event.end && (
+                  <>
+                    {" "}
+                    -{" "}
+                    {new Date(event.end!).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </>
+                )}
+              </div>
+
               {tags.length > 0 && (
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {tags.map((tag) => (

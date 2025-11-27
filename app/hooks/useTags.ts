@@ -15,7 +15,7 @@ export const useTags = () => {
       const res = await TagsService.getTags();
       setTags(res.tags);
     } catch (err) {
-      console.error("Load tags error", err);
+      // console.error("Load tags error", err);
     } finally {
       setLoading(false);
     }

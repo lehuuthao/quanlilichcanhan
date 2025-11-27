@@ -21,7 +21,7 @@ import { AppContext } from "@/contexts/app.context";
 
 export default function SignUp() {
   const router = useRouter();
-  const { setUser } = useContext(AppContext);
+  const { setUser, configureAuth } = useContext(AppContext);
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(initFormSignup);
@@ -59,7 +59,8 @@ export default function SignUp() {
         Cookie.set(AUTH_KEY, resp.token);
 
         setUser(resp.user);
-        router.push("/accounts");
+        configureAuth();
+        router.push("/tags");
       })
       .catch((error) => toast.error(error || "Something went wrong."))
       .finally(() => setLoading(false));

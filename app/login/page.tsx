@@ -51,7 +51,7 @@ export default function Login() {
             setRestAuth(resp.token);
             Cookie.set(AUTH_KEY, resp.token);
             console.log("token", resp.token);
-            router.push("/accounts");
+            router.push("/tags");
             setUser(resp.user);
             configureAuth();
           }

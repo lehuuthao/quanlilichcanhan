@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spinner, Pane, Button, toaster, TextInput } from "evergreen-ui";
+import {
+  Pane,
+  Button,
+  Spinner,
+  TextInput,
+  toaster,
+  IconButton,
+  Tooltip,
+  TickIcon,
+  CrossIcon,
+} from "evergreen-ui";
 import RemindersService, {
   Reminder,
   CreateReminderPayload,
@@ -32,8 +42,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
       const res = await RemindersService.getReminders();
       const filtered = res.reminders.filter((r) => r.eventId === eventId);
       setReminders(filtered);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toaster.danger("Failed to load reminders");
     } finally {
       setLoading(false);
@@ -45,11 +54,11 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
   }, [eventId]);
 
   const handleToggle = (id: string) => {
-    if (selected.includes(id)) {
-      onSelect(selected.filter((sid) => sid !== id));
-    } else {
-      onSelect([...selected, id]);
-    }
+    onSelect(
+      selected.includes(id)
+        ? selected.filter((s) => s !== id)
+        : [...selected, id]
+    );
   };
 
   const handleCreate = async () => {
@@ -62,8 +71,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
       onSelect([...selected, res.reminder._id]);
       setNewTime("");
       toaster.success("Reminder created!");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toaster.danger("Failed to create reminder");
     } finally {
       setSaving(false);
@@ -78,8 +86,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
       setReminders(reminders.map((r) => (r._id === id ? res.reminder : r)));
       toaster.success("Reminder updated!");
       setEditingId(null);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toaster.danger("Failed to update reminder");
     } finally {
       setSaving(false);
@@ -92,10 +99,9 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
     try {
       await RemindersService.deleteReminder(id);
       setReminders(reminders.filter((r) => r._id !== id));
-      onSelect(selected.filter((sid) => sid !== id));
+      onSelect(selected.filter((s) => s !== id));
       toaster.success("Reminder deleted!");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toaster.danger("Failed to delete reminder");
     } finally {
       setSaving(false);
@@ -111,56 +117,105 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 max-h-64 overflow-auto border p-2 rounded">
+    <Pane
+      display="flex"
+      flexDirection="column"
+      gap={8}
+      maxHeight={256}
+      overflowY="auto"
+    >
       {reminders.map((r) => (
-        <div key={r._id} className="flex items-center justify-between gap-2">
+        <Pane
+          key={r._id}
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          padding={8}
+          borderRadius={6}
+          backgroundColor={selected.includes(r._id) ? "#e0f2ff" : "#f5f6fa"}
+          border="1px solid #d0d7e2"
+          cursor="pointer"
+          onClick={() => handleToggle(r._id)}
+          gap={8}
+        >
           {editingId === r._id ? (
-            <TextInput
-              type="datetime-local"
-              value={r.time}
-              onChange={(e) => handleUpdate(r._id, e.target.value)}
-            />
+            <Pane display="flex" alignItems="center" gap={4} flex={1}>
+              <TextInput
+                type="datetime-local"
+                value={r.time}
+                onChange={(e) => setNewTime(e.target.value)}
+                flex={1}
+              />
+              <IconButton
+                icon={TickIcon}
+                intent="success"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdate(r._id, newTime || r.time);
+                }}
+              />
+              <IconButton
+                icon={CrossIcon}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingId(null);
+                }}
+              />
+            </Pane>
           ) : (
-            <Button
-              appearance="minimal"
-              onClick={() => handleToggle(r._id)}
-              intent={selected.includes(r._id) ? "success" : "none"}
-            >
-              {new Date(r.time).toLocaleString()}
-            </Button>
+            <>
+              <Pane flex={1}>
+                {new Date(r.time).toLocaleString([], {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Pane>
+              <Pane display="flex" gap={4}>
+                <Tooltip content="Edit">
+                  <IconButton
+                    icon={TickIcon}
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingId(r._id);
+                      setNewTime(r.time);
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip content="Delete">
+                  <IconButton
+                    icon={CrossIcon}
+                    size="small"
+                    intent="danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(r._id);
+                    }}
+                  />
+                </Tooltip>
+              </Pane>
+            </>
           )}
-          <div className="flex gap-1">
-            <Button
-              appearance="minimal"
-              intent="warning"
-              onClick={() => setEditingId(r._id)}
-            >
-              Edit
-            </Button>
-            <Button
-              appearance="minimal"
-              intent="danger"
-              onClick={() => handleDelete(r._id)}
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
+        </Pane>
       ))}
 
       {eventId && (
-        <div className="flex gap-2 mt-2">
-          <input
+        <Pane display="flex" gap={8} alignItems="center">
+          <TextInput
             type="datetime-local"
-            className="border p-1 rounded flex-1"
+            placeholder="New reminder..."
             value={newTime}
             onChange={(e) => setNewTime(e.target.value)}
+            flex={1}
           />
-          <Button onClick={handleCreate} intent="success" disabled={saving}>
+          <Button intent="success" onClick={handleCreate} disabled={saving}>
             {saving ? <Spinner size={16} /> : "Add"}
           </Button>
-        </div>
+        </Pane>
       )}
-    </div>
+    </Pane>
   );
 };

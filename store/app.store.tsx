@@ -8,10 +8,12 @@ import { AUTH_KEY } from "@/constants/auth.constant";
 import { AppContext } from "@/contexts/app.context";
 import { User } from "@/types";
 import { getCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 const AppProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
 
   const initialLoaded = useRef(false);
 

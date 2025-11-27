@@ -7,7 +7,7 @@ import XIcon from "@/assets/Icons/XIcon";
 import { KingFooter } from "@/assets/Images";
 import ImageComp from "@/components/Image";
 import { cn } from "@/utils/styles";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 const SocialIcon = ({
   icon,
@@ -27,13 +27,21 @@ const SocialIcon = ({
 );
 
 const Footer = () => {
+  const [year, setYear] = useState<number>();
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
+  if (!year) return null;
   return (
     <div className="flex flex-col items-center px-6 pt-8 lg:pt-[74px] bg-rafl_purple-950 overflow-hidden">
       <div className="flex flex-col md:flex-row-reverse w-full gap-y-[42px] max-w-[1040px]">
         <div className="flex flex-col gap-y-8 md:flex-1 md:w-full md:items-end">
-          <p className="text-[64px] leading-[50px] font-black text-rafl_violet-50 tracking-[-3px]">
-            follow us
+          <p className="text-[64px] leading-[55px] font-black text-rafl_violet-50 tracking-[5px]">
+            plan your time
           </p>
+
           <div className="flex items-center w-full md:justify-end flex-wrap gap-2">
             <SocialIcon
               icon={<TelegramIcon />}
@@ -59,26 +67,28 @@ const Footer = () => {
           </div>
         </div>
         <div className="flex flex-col">
-          <p className="text-[96px] font-black text-rafl_violet-50 tracking-[-3px] leading-[90px] md:max-w-[337px]">
-            rafl about pool
+          <p className="text-[96px] font-black text-rafl_violet-50 tracking-[-3px] leading-[96px] md:max-w-[337px]">
+            calendar events easily
           </p>
         </div>
       </div>
       <div className="flex items-center flex-wrap w-full gap-x-8 gap-y-4 mt-16 lg:mt-[130px] max-w-[1040px]">
         <p className="text-2xl leading-6 font-black text-violet-50 tracking-tight">
-          privacy policy
+          personal schedule
         </p>
         <p className="text-2xl leading-6 font-black text-violet-50 tracking-tight">
-          terms of use
+          event tags
         </p>
         <p className="text-2xl leading-6 font-black text-violet-50 tracking-tight">
-          careers
+          calendar settings
         </p>
       </div>
+
       <div className="flex items-center w-full max-w-[1040px] relative pb-9 lg:pb-[74px]">
-        <p className="text-lg leading-6 text-rafl_purple-400 font-black md:text-2xl md:leading-7 mt-6">
-          Copyright {new Date().getFullYear()} - All Rights Reserved
+        <p className="text-lg leading-6 text-rafl_purple-400 font-medium md:text-xl md:leading-7 mt-6">
+          © {year} Personal Schedule Manager — All rights reserved.
         </p>
+
         <ImageComp
           loading="lazy"
           src={KingFooter}

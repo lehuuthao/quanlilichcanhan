@@ -6,13 +6,17 @@ import Footer from "../Footer";
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
   const pathname = usePathname();
-  const isAuthRoute = ["/login", "/sign-up"].includes(pathname);
+
+  const hideHeaderRoutes = ["/login", "/sign-up"];
+
+  const shouldHideHeader =
+    hideHeaderRoutes.includes(pathname) || pathname.startsWith("/tags");
 
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden">
-      <Header />
+      {!shouldHideHeader && <Header />}
       {children}
-      {!isAuthRoute && <Footer />}
+      {!hideHeaderRoutes.includes(pathname) && <Footer />}
     </div>
   );
 };
